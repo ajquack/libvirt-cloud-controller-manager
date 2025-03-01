@@ -65,7 +65,7 @@ docker_manifests:
 release:
   ids: [""]
   extra_files:
-    #- glob: ./deploy/ccm*.yaml
+    - glob: ./deploy/lccm*.yaml
     - glob: ./libvirt-cloud-controller-manager-*.tgz
 
 #publishers:
