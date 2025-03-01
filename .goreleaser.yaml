@@ -6,7 +6,7 @@ version: 2
 before:
   hooks:
     - go mod tidy
-    #- ./scripts/release-generate-deployment-yamls.sh {{ .Version }}
+    - ./scripts/release-generate-deployment-yamls.sh {{ .Version }}
 
 builds:
   - id: libvirt-cloud-controller-manager
@@ -41,12 +41,12 @@ dockers:
     image_templates:
       - ajquack/libvirt-cloud-controller-manager:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-amd64
     use: buildx
-  - build_flag_templates: [--platform=linux/arm64]
-    dockerfile: Dockerfile
-    goarch: arm64
-    image_templates:
-      - ajquack/libvirt-cloud-controller-manager:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-arm64v8
-    use: buildx
+  #- build_flag_templates: [--platform=linux/arm64]
+  #  dockerfile: Dockerfile
+  #  goarch: arm64
+  #  image_templates:
+  #    - ajquack/libvirt-cloud-controller-manager:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-arm64v8
+  #  use: buildx
   #- build_flag_templates: [--platform=linux/arm/v6]
   #  dockerfile: Dockerfile
   #  goarch: arm
