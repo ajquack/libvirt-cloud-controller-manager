@@ -1,0 +1,64 @@
+---
+linters-settings:
+  exhaustive:
+    default-signifies-exhaustive: true
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/hetznercloud)
+
+  importas:
+    no-unaliased: true
+    alias:
+      # Kubernetes
+      - pkg: k8s.io/api/core/v1
+        alias: corev1
+      - pkg: k8s.io/apimachinery/pkg/apis/meta/v1
+        alias: metav1
+
+      - pkg: github.com/syself/hrobot-go
+        alias: hrobot
+      - pkg: github.com/syself/hrobot-go/models
+        alias: hrobotmodels
+
+  misspell:
+    locale: "US"
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - copyloopvar
+    - errcheck
+    - errname
+    - exhaustive
+    - gci
+    - gocritic
+    - godot
+    - goimports
+    - gomodguard
+    - gosec
+    - gosimple
+    - govet
+    - importas
+    - ineffassign
+    - misspell
+    - prealloc
+    - revive
+    - staticcheck
+    - typecheck
+    - unparam
+    - unused
+    - whitespace
+
+issues:
+  exclude-rules:
+    - path: (_test\.go|testing\.go|testsupport|e2etests)
+      linters:
+        - gosec
+        - errcheck
+    - path: internal/mocks
+      linters:
+        - unparam
+        - revive

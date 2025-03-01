@@ -1,0 +1,35 @@
+args:
+  cloud-provider: libvirt
+  allow-untagged-cloud: ""
+
+kind: Deployment
+replicaCount: 1
+env:
+  LIBVIRT_URI:
+    valueFrom:
+      secretKeyRef:
+        name: libvirt
+        key: uri
+image:
+  repository: ghcr.io/ajquack/libvirt-cloud-controller-manager
+  tag: "v{{ $.Chart.Version }}"
+
+monitoring:
+  enabled: true
+  podMonitor:
+    enabled: false
+    labels: {}
+    annotations: {}
+    spec:
+      podMetricsEndpoints:
+        - port: metrics
+nameOverride: ~
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 50Mi
+
+selectorLabels:
+  app.kubernetes.io/name: '{{ include "libvirt-cloud-controller-manager.name" $ }}'
+  app.kubernetes.io/instance: "{{ $.Release.Name }}"

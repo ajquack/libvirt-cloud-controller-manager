@@ -1,0 +1,9 @@
+/bin
+/vendor
+dist/
+deploy/gen/
+.coverage.out
+.envrc
+libvirt-cloud-controller-manager
+*.tgz
+hack/.*

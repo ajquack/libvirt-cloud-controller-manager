@@ -1,0 +1,4 @@
+apiVersion: v2
+name: libvirt-cloud-controller-manager
+type: application
+version: 0.0.1
