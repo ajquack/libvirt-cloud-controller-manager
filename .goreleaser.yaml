@@ -68,14 +68,14 @@ release:
     - glob: ./deploy/lccm*.yaml
     - glob: ./libvirt-cloud-controller-manager-*.tgz
 
-#publishers:
-#  - name: helm-chart-repo
-#
-#    # make sure that this is only executed once. There are no separate ids per binary built,
-#    # we filter for no actual ID and then run the publisher for the checksum.
-#    ids: [""]
-#    checksum: true
-#
-#    cmd: ./scripts/publish-helm-chart.sh libvirt-cloud-controller-manager-{{ .Version }}.tgz
-#    env:
-#      - CHART_REPO_REMOTE={{ .Env.CHART_REPO_REMOTE }}
+publishers:
+  - name: helm-chart-repo
+
+    # make sure that this is only executed once. There are no separate ids per binary built,
+    # we filter for no actual ID and then run the publisher for the checksum.
+    ids: [""]
+    checksum: true
+
+    cmd: ./scripts/publish-helm-chart.sh libvirt-cloud-controller-manager-{{ .Version }}.tgz
+    env:
+      - CHART_REPO_REMOTE={{ .Env.CHART_REPO_REMOTE }}
