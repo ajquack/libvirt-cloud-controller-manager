@@ -16,7 +16,7 @@ builds:
       - linux
     goarch:
       - amd64
-      - arm64
+      #- arm64
       #- arm
     binary: libvirt-cloud-controller-manager
     ldflags:
@@ -29,10 +29,10 @@ builds:
         goarch: amd64
         env:
           - CC=gcc
-      - goos: linux
-        goarch: arm64
-        env:
-          - CC=aarch64-linux-gnu-gcc
+      #- goos: linux
+      #  goarch: arm64
+      #  env:
+      #    - CC=aarch64-linux-gnu-gcc
 
 dockers:
   - build_flag_templates: [--platform=linux/amd64]
