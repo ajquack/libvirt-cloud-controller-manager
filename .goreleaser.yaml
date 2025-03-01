@@ -56,9 +56,9 @@ dockers:
   #  use: buildx
 
 docker_manifests:
-  - name_template: ajquack/libvirt-cloud-controller-manager:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}
+  - name_template: ghcr.io/ajquack/libvirt-cloud-controller-manager:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}
     image_templates:
-      - ajquack/libvirt-cloud-controller-manager:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-amd64
+      - ghcr.io/ajquack/libvirt-cloud-controller-manager:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-amd64
       # ajquack/libvirt-cloud-controller-manager:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-arm64v8
       #- ajquack/libvirt-cloud-controller-manager:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-armv6
 
