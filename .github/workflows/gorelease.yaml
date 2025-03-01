@@ -22,6 +22,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install build dependencies
+        run: sudo apt-get install -y libvirt
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
