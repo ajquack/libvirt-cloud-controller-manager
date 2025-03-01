@@ -24,6 +24,15 @@ builds:
       - -w
       - -X github.com/ajquack/libvirt-cloud-controller-manager/libvirt.providerVersion={{ if not .IsSnapshot }}v{{ end }}{{ .Version }}
       - -X k8s.io/component-base/version.gitVersion={{ if not .IsSnapshot }}v{{ end }}{{ .Version }}
+    overrides:
+      - goos: linux
+        goarch: amd64
+        env:
+          - CC=gcc
+      - goos: linux
+        goarch: arm64
+        env:
+          - CC=aarch64-linux-gnu-gcc
 
 dockers:
   - build_flag_templates: [--platform=linux/amd64]
