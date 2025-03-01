@@ -126,7 +126,7 @@ func (s libvirtDomain) Metadata(cfg config.LCCMConfiguration) (*cloudprovider.In
 		Zone:          "",
 		Region:        "",
 		AdditionalLabels: map[string]string{
-			ProvidedBy: "cloud",
+			ProvidedBy: "libvirt",
 		},
 	}, nil
 }
