@@ -78,7 +78,6 @@ func (c *cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, 
 }
 
 func (c *cloud) Instances() (cloudprovider.Instances, bool) {
-	// Replaced by InstancesV2
 	return nil, false
 }
 
