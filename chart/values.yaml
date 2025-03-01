@@ -33,3 +33,23 @@ resources:
 selectorLabels:
   app.kubernetes.io/name: '{{ include "libvirt-cloud-controller-manager.name" $ }}'
   app.kubernetes.io/instance: "{{ $.Release.Name }}"
+
+
+additionalTolerations: []
+
+# nodeSelector:
+#   node-role.kubernetes.io/control-plane: ""
+nodeSelector: {}
+
+# Set the affinity for pods. (Only works with kind=Deployment)
+affinity: {}
+
+podLabels: {}
+
+podAnnotations: {}
+
+# Mounts the specified volume to the hcloud-cloud-controller-manager container.
+extraVolumeMounts: []
+
+# Adds extra volumes to the pod.
+extraVolumes: []
