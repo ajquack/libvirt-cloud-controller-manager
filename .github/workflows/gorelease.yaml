@@ -67,7 +67,7 @@ jobs:
         env:
           GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CHART_REPO_REMOTE: "https://${{ secrets.LIBVIRTBOT_TOKEN }}@github.com/ajquack/helm-charts"
+          CHART_REPO_REMOTE: "https://${{ secrets.LIBVIRT_TOKEN }}@github.com/ajquack/helm-charts"
 
       - name: Clear
         if: always()
