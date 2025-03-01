@@ -1,11 +1,10 @@
-{{- if eq $.Values.kind "Deployment" }}
+{{- if eq $.Values.kind "DaemonSet" }}
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: {{ include "libvirt-cloud-controller-manager.name" . }}
   namespace: {{ .Release.Namespace }}
 spec:
-  replicas: {{ .Values.replicaCount }}
   revisionHistoryLimit: 2
   selector:
     matchLabels:
@@ -50,26 +49,15 @@ spec:
       {{- if gt (len .Values.nodeSelector) 0 }}
       nodeSelector:
         {{ toYaml .Values.nodeSelector | nindent 8 }}
-      {{- end }}
-
-      {{- if gt (len .Values.affinity) 0 }}
-      affinity:
-        {{ toYaml .Values.affinity | nindent 8 }}
-      {{- end }}
-
-      {{- if $.Values.networking.enabled }}
-      hostNetwork: true
-      {{- end }}
+      {{- end }}}
       containers:
         - name: libvirt-cloud-controller-manager
-          args:
+          command:
+            - "/bin/libvirt-cloud-controller-manager"
             {{- range $key, $value := $.Values.args }}
             {{- if not (eq $value nil) }}
             - "--{{ $key }}{{ if $value }}={{ $value }}{{ end }}"
             {{- end }}
-            {{- end }}
-            {{- if (eq (int $.Values.replicaCount) 1) }}
-            - "--leader-elect=false"
             {{- end }}
           env:
             {{- range $key, $value := $.Values.env }}
