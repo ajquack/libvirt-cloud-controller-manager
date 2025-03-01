@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install build dependencies
-        run: sudo apt update && sudo apt-get install -y libvirt-dev
+        run: sudo apt update && sudo apt-get install -y libvirt-dev gcc-aarch64-linux-gnu
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -46,7 +46,7 @@ jobs:
         if: "!startsWith(github.ref, 'refs/tags/')"
         uses: goreleaser/goreleaser-action@v6
         with:
-          version: "~> v2"
+          version: "~> v0.1"
           args: release --snapshot --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -62,7 +62,7 @@ jobs:
         if: "startsWith(github.ref, 'refs/tags/')"
         uses: goreleaser/goreleaser-action@v6
         with:
-          version: "~> v2"
+          version: "~> v0.1"
           args: release --clean
         env:
           # https://github.com/goreleaser/goreleaser/blob/3345f8c9c5b287198a29d3db228388148b788c5e/www/docs/customization/builds.md?plain=1#L416-L418
