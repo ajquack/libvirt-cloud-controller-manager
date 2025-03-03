@@ -28,3 +28,24 @@ func getDomainByUUID(l *libvirt.Connect, uuid string) (*libvirt.Domain, error) {
 	}
 	return dom, nil
 }
+
+func generateDomainType(d libvirt.Domain) string {
+	const op = "libvirt/generateDomainType"
+	metrics.OperationCalled.WithLabelValues(op).Inc()
+
+	domainVCPU, err := d.GetVcpus()
+	if err != nil {
+		fmt.Printf("%s: %v\n", op, err)
+		return ""
+	}
+	vcpus := len(domainVCPU)
+
+	domainMemory, err := d.GetMaxMemory()
+	if err != nil {
+		fmt.Printf("%s: %v\n", op, err)
+		return ""
+	}
+	memory := int64(domainMemory) / (1024 * 1024)
+
+	return fmt.Sprintf("%dCPU%dRAM", vcpus, memory)
+}
