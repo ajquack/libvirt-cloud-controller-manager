@@ -44,6 +44,10 @@ func NewCloud(cidr string) (cloudprovider.Interface, error) {
 		go metrics.Serve(config.Metrics.Address)
 	}
 
+	if config.LibvirtClient.Debug {
+		klog.V(2).Infof("%s: Debug mode enabled, turning on verbose logging", op)
+	}
+
 	client, err := libvirt.NewConnect(config.LibvirtClient.LibvirtURI)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to libvirt: %v", err)

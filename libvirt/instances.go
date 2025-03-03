@@ -8,6 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 	cloudprovider "k8s.io/cloud-provider"
+	"k8s.io/klog/v2"
 
 	"github.com/ajquack/libvirt-cloud-controller-manager/internal/config"
 	"github.com/ajquack/libvirt-cloud-controller-manager/internal/metrics"
@@ -159,27 +160,73 @@ func (s libvirtDomain) IsShutdown() (bool, error) {
 	return state == libvirt.DOMAIN_SHUTOFF, nil
 }
 
-func (s libvirtDomain) Metadata(cfg config.LCCMConfiguration) (*cloudprovider.InstanceMetadata, error) {
+func (s libvirtDomain) Metadata(config config.LCCMConfiguration) (*cloudprovider.InstanceMetadata, error) {
+	if config.LibvirtClient.Debug {
+		domainName, _ := s.GetName()
+		klog.V(2).Infof("libvirt/Metadata: Getting metadata for domain %s", domainName)
+	}
+
 	uuid, err := s.GetUUIDString()
 	if err != nil {
+		if config.LibvirtClient.Debug {
+			klog.Errorf("libvirt/Metadata: Failed to get domain UUID: %v", err)
+		}
 		return nil, fmt.Errorf("failed to get domain UUID: %w", err)
 	}
+
+	if config.LibvirtClient.Debug {
+		klog.V(2).Infof("libvirt/Metadata: Got domain UUID: %s", uuid)
+	}
+
 	domainNodeAdresses, err := domainNodeAdresses(s.Domain)
 	if err != nil {
+		if config.LibvirtClient.Debug {
+			klog.Errorf("libvirt/Metadata: Failed to get domain node addresses: %v", err)
+		}
 		return nil, fmt.Errorf("failed to get domain node addresses: %w", err)
 	}
+
+	if config.LibvirtClient.Debug {
+		klog.V(2).Infof("libvirt/Metadata: Got %d node addresses", len(domainNodeAdresses))
+		for _, addr := range domainNodeAdresses {
+			klog.V(2).Infof("  - %s: %s", addr.Type, addr.Address)
+		}
+	}
+
 	domcon, err := s.DomainGetConnect()
 	if err != nil {
+		if config.LibvirtClient.Debug {
+			klog.Errorf("libvirt/Metadata: Failed to get domain connection: %v", err)
+		}
 		return nil, fmt.Errorf("failed to get domain connection: %w", err)
 	}
+
+	if config.LibvirtClient.Debug {
+		klog.V(2).Infof("libvirt/Metadata: Got domain connection")
+	}
+
 	nodeName, err := domcon.GetHostname()
 	if err != nil {
+		if config.LibvirtClient.Debug {
+			klog.Errorf("libvirt/Metadata: Failed to get hostname: %v", err)
+		}
 		return nil, fmt.Errorf("failed to get hostname: %w", err)
+	}
+	if config.LibvirtClient.Debug {
+		klog.V(2).Infof("libvirt/Metadata: Got hostname: %s", nodeName)
+	}
+
+	domainType, err := generateDomainType(*s.Domain)
+	if err != nil {
+		if config.LibvirtClient.Debug {
+			klog.Errorf("libvirt/Metadata: Failed to generate domain type: %v", err)
+		}
+		return nil, fmt.Errorf("failed to generate domain type: %w", err)
 	}
 
 	return &cloudprovider.InstanceMetadata{
 		ProviderID:    providerid.FromDomainID(uuid),
-		InstanceType:  generateDomainType(*s.Domain),
+		InstanceType:  domainType,
 		NodeAddresses: domainNodeAdresses,
 		Zone:          nodeName,
 		Region:        nodeName,
@@ -193,20 +240,45 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *corev1.Node) (*c
 	const op = "libvirt/instancesv2.InstanceMetadata"
 	metrics.OperationCalled.WithLabelValues(op).Inc()
 
+	// Add debug log at the beginning
+	if i.config.LibvirtClient.Debug {
+		klog.V(2).Infof("%s: Getting metadata for node %s (provider ID: %s)", op, node.Name, node.Spec.ProviderID)
+	}
+
 	server, err := i.lookupDomain(node)
 	if err != nil {
+		klog.Errorf("%s: Failed to lookup domain for node %s: %v", op, node.Name, err)
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	if server == nil {
+		klog.Errorf("%s: No matching domain found for node %s", op, node.Name)
 		return nil, fmt.Errorf(
 			"%s: failed to get instance metadata: no matching server found for node '%s': %w",
 			op, node.Name, errDomainNotFound)
 	}
 
+	if i.config.LibvirtClient.Debug {
+		klog.V(2).Infof("%s: Found domain for node %s, retrieving metadata", op, node.Name)
+	}
+
 	metadata, err := server.Metadata(i.config)
 	if err != nil {
+		klog.Errorf("%s: Failed to get metadata for node %s: %v", op, node.Name, err)
 		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	if i.config.LibvirtClient.Debug {
+		klog.V(2).Infof("%s: Retrieved metadata for node %s:", op, node.Name)
+		klog.V(2).Infof("  - ProviderID: %s", metadata.ProviderID)
+		klog.V(2).Infof("  - InstanceType: %s", metadata.InstanceType)
+		klog.V(2).Infof("  - Zone: %s", metadata.Zone)
+		klog.V(2).Infof("  - Region: %s", metadata.Region)
+		klog.V(2).Infof("  - NodeAddresses:")
+		for _, addr := range metadata.NodeAddresses {
+			klog.V(2).Infof("    - %s: %s", addr.Type, addr.Address)
+		}
+		klog.V(2).Infof("  - Labels: %v", metadata.AdditionalLabels)
 	}
 
 	return metadata, nil
