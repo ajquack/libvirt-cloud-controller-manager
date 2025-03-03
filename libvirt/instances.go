@@ -71,6 +71,54 @@ func (i *instances) lookupDomain(node *corev1.Node) (genericServer, error) {
 	}
 }
 
+func domainNodeAdresses(d *libvirt.Domain) ([]corev1.NodeAddress, error) {
+	var addresses []corev1.NodeAddress
+	domainName, err := d.GetName()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get domain name: %w", err)
+	}
+	addresses = append(addresses, corev1.NodeAddress{Type: corev1.NodeHostName, Address: domainName})
+
+	interfaces, err := d.ListAllInterfaceAddresses(1) // 1 means use the guest agent
+	if err != nil {
+		return nil, fmt.Errorf("failed to get interface addresses: %w", err)
+	}
+
+	// No interfaces found
+	if len(interfaces) == 0 {
+		return nil, fmt.Errorf("no network interfaces found")
+	}
+
+	// Strategy: Look for the first non-loopback interface with an IPv4 address
+	for _, iface := range interfaces {
+		// Skip loopback interfaces
+		if iface.Name == "lo" {
+			continue
+		}
+
+		// Look for IPv4 addresses
+		for _, addr := range iface.Addrs {
+			if addr.Type == libvirt.IP_ADDR_TYPE_IPV4 {
+				addresses = append(addresses, corev1.NodeAddress{Type: corev1.NodeInternalIP, Address: addr.Addr})
+			}
+		}
+	}
+
+	// If no IPv4 found, try IPv6
+	for _, iface := range interfaces {
+		if iface.Name == "lo" {
+			continue
+		}
+
+		for _, addr := range iface.Addrs {
+			if addr.Type == libvirt.IP_ADDR_TYPE_IPV6 {
+				addresses = append(addresses, corev1.NodeAddress{Type: corev1.NodeInternalIP, Address: addr.Addr})
+			}
+		}
+	}
+	return addresses, nil
+}
+
 func (i *instances) InstanceExists(ctx context.Context, node *corev1.Node) (bool, error) {
 	const op = "libvirt/instancesv2.InstanceExists"
 	metrics.OperationCalled.WithLabelValues(op).Inc()
@@ -116,13 +164,25 @@ func (s libvirtDomain) Metadata(cfg config.LCCMConfiguration) (*cloudprovider.In
 	if err != nil {
 		return nil, fmt.Errorf("failed to get domain UUID: %w", err)
 	}
+	domainNodeAdresses, err := domainNodeAdresses(s.Domain)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get domain node addresses: %w", err)
+	}
+	domcon, err := s.DomainGetConnect()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get domain connection: %w", err)
+	}
+	nodeName, err := domcon.GetHostname()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hostname: %w", err)
+	}
 
 	return &cloudprovider.InstanceMetadata{
-		ProviderID:   providerid.FromDomainID(uuid),
-		InstanceType: "libvirttype",
-		// NodeAddresses: []v1.NodeAddresses{},
-		Zone:   "libvirtzone",
-		Region: "libvirtregion",
+		ProviderID:    providerid.FromDomainID(uuid),
+		InstanceType:  generateDomainType(*s.Domain),
+		NodeAddresses: domainNodeAdresses,
+		Zone:          nodeName,
+		Region:        nodeName,
 		AdditionalLabels: map[string]string{
 			ProvidedBy: "libvirt",
 		},
