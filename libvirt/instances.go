@@ -90,34 +90,23 @@ func domainNodeAdresses(d *libvirt.Domain) ([]corev1.NodeAddress, error) {
 		return nil, fmt.Errorf("no network interfaces found")
 	}
 
-	// Strategy: Look for the first non-loopback interface with an IPv4 address
+	// Strategy: Look for the first non-loopback interface with an IP address
 	for _, iface := range interfaces {
 		// Skip loopback interfaces
 		if iface.Name == "lo" {
 			continue
 		}
 
-		// Look for IPv4 addresses
+		// Look for IP addresses
 		for _, addr := range iface.Addrs {
 			if addr.Type == libvirt.IP_ADDR_TYPE_IPV4 {
 				addresses = append(addresses, corev1.NodeAddress{Type: corev1.NodeInternalIP, Address: addr.Addr})
+				return addresses, nil // Return only the first IP address found
 			}
 		}
 	}
 
-	// If no IPv4 found, try IPv6
-	for _, iface := range interfaces {
-		if iface.Name == "lo" {
-			continue
-		}
-
-		for _, addr := range iface.Addrs {
-			if addr.Type == libvirt.IP_ADDR_TYPE_IPV6 {
-				addresses = append(addresses, corev1.NodeAddress{Type: corev1.NodeInternalIP, Address: addr.Addr})
-			}
-		}
-	}
-	return addresses, nil
+	return nil, fmt.Errorf("no valid IP addresses found")
 }
 
 func (i *instances) InstanceExists(ctx context.Context, node *corev1.Node) (bool, error) {
@@ -230,9 +219,6 @@ func (s libvirtDomain) Metadata(config config.LCCMConfiguration) (*cloudprovider
 		NodeAddresses: domainNodeAdresses,
 		Zone:          nodeName,
 		Region:        nodeName,
-		AdditionalLabels: map[string]string{
-			ProvidedBy: "libvirt",
-		},
 	}, nil
 }
 
