@@ -25,14 +25,14 @@ spec:
       serviceAccountName: {{ include "libvirt-cloud-controller-manager.name" . }}
       dnsPolicy: Default
       tolerations:
-        # Allow HCCM itself to schedule on nodes that have not yet been initialized by HCCM.
+        # Allow LCCM itself to schedule on nodes that have not yet been initialized by LCCM.
         - key: "node.cloudprovider.kubernetes.io/uninitialized"
           value: "true"
           effect: "NoSchedule"
         - key: "CriticalAddonsOnly"
           operator: "Exists"
 
-        # Allow HCCM to schedule on control plane nodes.
+        # Allow LCCM to schedule on control plane nodes.
         - key: "node-role.kubernetes.io/master"
           effect: NoSchedule
           operator: Exists
