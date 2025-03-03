@@ -10,6 +10,21 @@ env:
       secretKeyRef:
         name: libvirt
         key: uri
+  # Uncomment to enable debug logs for libvirt calls. Possible values are:
+  # 1: DEBUG
+  # 2: INFO
+  # 3: WARNING
+  # 4: ERROR
+  # LIBVIRT_DEBUG:
+  #   value: 4
+  # Uncomment to enable debug logs for the cloud controller manager.
+  # DEBUG:
+  #   value: "true" 
+  # Uncomment to enbable Metrics
+  # METRICS_ENABLED:
+  #  value: "true"
+  # METRICS_ADDR:
+  #   value: ":8233"
 image:
   repository: ghcr.io/ajquack/libvirt-cloud-controller-manager
   tag: "v{{ $.Chart.Version }}"
