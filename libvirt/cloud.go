@@ -45,7 +45,7 @@ func NewCloud(cidr string) (cloudprovider.Interface, error) {
 	}
 
 	if config.General.Debug {
-		klog.V(2).Infof("%s: Debug mode enabled, turning on verbose logging", op)
+		klog.Infof("%s: Debug mode enabled, turning on verbose logging", op)
 	}
 
 	client, err := libvirt.NewConnect(config.LibvirtClient.LibvirtURI)
