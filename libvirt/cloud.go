@@ -44,7 +44,7 @@ func NewCloud(cidr string) (cloudprovider.Interface, error) {
 		go metrics.Serve(config.Metrics.Address)
 	}
 
-	if config.LibvirtClient.Debug {
+	if config.General.Debug {
 		klog.V(2).Infof("%s: Debug mode enabled, turning on verbose logging", op)
 	}
 
