@@ -27,9 +27,7 @@ type libvirtDomain struct {
 
 type genericServer interface {
 	IsShutdown() (bool, error)
-	Metadata(
-		cfg config.LCCMConfiguration,
-	) (*cloudprovider.InstanceMetadata, error)
+	Metadata(cfg config.LCCMConfiguration) (*cloudprovider.InstanceMetadata, error)
 }
 
 var (
@@ -120,11 +118,11 @@ func (s libvirtDomain) Metadata(cfg config.LCCMConfiguration) (*cloudprovider.In
 	}
 
 	return &cloudprovider.InstanceMetadata{
-		ProviderID:    providerid.FromDomainID(uuid),
-		InstanceType:  "",
-		NodeAddresses: []corev1.NodeAddress{},
-		Zone:          "",
-		Region:        "",
+		ProviderID:   providerid.FromDomainID(uuid),
+		InstanceType: "libvirttype",
+		// NodeAddresses: []v1.NodeAddresses{},
+		Zone:   "libvirtzone",
+		Region: "libvirtregion",
 		AdditionalLabels: map[string]string{
 			ProvidedBy: "libvirt",
 		},
