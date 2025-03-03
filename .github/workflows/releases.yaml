@@ -1,0 +1,28 @@
+name: releases
+
+on:
+  push:
+    branches: [main]
+  pull_request_target:
+    types:
+      - edited
+      - labeled
+      - unlabeled
+
+jobs:
+  releaser-pleaser:
+    # Do not run on forks.
+    if: github.repository == 'ajquack/libvirt-cloud-controller-manager'
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: releaser-pleaser
+        uses: apricote/releaser-pleaser@v0.5.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          extra-files: |
+            deploy/lccm.yaml
+            chart/Chart.yaml
