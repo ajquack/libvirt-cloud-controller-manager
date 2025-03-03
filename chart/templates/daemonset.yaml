@@ -65,7 +65,7 @@ spec:
               {{- tpl (toYaml $value) $ | nindent 14 }}
             {{- end }}
             {{- if not $.Values.monitoring.enabled }}
-            - name: libvirt_METRICS_ENABLED
+            - name: METRICS_ENABLED
               value: "false"
             {{- end }}
           image: {{ $.Values.image.repository }}:{{ tpl $.Values.image.tag . }} # x-releaser-pleaser-version
